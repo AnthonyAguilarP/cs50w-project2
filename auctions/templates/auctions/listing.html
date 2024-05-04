@@ -1,0 +1,81 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+<div class="container">
+
+    {% if message %}
+        <div class="alert {% if update %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+            {{ message }}
+        </div>
+    {% endif %}
+
+    {% if not lD.isActive and user == lD.price.user %}
+        <div class="alert alert-success mt-4">
+            You won!
+        </div>
+    {% endif %}
+
+    <div class="row mt-4">
+        {% if user.is_authenticated%}
+            {% if iO %}
+                <form action="{% url 'closeAuction' id=lD.id %}" method="post" class="mb-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Close Auction</button>
+                </form>
+            {% endif %}
+            {% if iL %}
+                <form action="{% url 'removeWatchlist' id=lD.id %}" method="post" class="mb-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Remove from Watchlist</button>
+                </form>
+            {% else %}
+                <form action="{% url 'addWatchlist' id=lD.id %}" method="post" class="mb-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Add to Watchlist</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <h2 class="mt-4">{{ lD.title }}</h2>
+    <img src="{{ lD.imageURL }}" alt="{{ lD.title }}" class="img-fluid mb-4">
+    <p>{{ lD.description }}</p>
+    <p>Owner: {{ lD.owner }}</p>
+    <h6>Current Bid: {{ lD.price.bid }}</h6>
+
+    {% if user.is_authenticated %}
+        <form action="{% url 'addBid' id=lD.id %}" method="POST" class="mb-4">
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="number" name="newBid" class="form-control" placeholder="Enter a new bid">
+                <button type="submit" class="btn btn-primary">Place Bid</button>
+            </div>
+        </form>
+    {% endif %}
+
+    <div class="row mt-4">
+        <h2>Comments</h2>
+        {% if user.is_authenticated %}
+            <form action="{% url 'addComment' id=lD.id %}" method="post" class="mb-4">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" name="newComment" class="form-control" placeholder="Add a comment">
+                    <button type="submit" class="btn btn-warning">Post Comment</button>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+
+    <ul class="list-group">
+        {% for comment in aC %}
+            <li class="list-group-item">
+                {{ comment.message }}<br>
+                Posted by: {{ comment.author }}
+            </li>
+        {% endfor %}
+    </ul>
+
+</div>
+
+{% endblock %}
